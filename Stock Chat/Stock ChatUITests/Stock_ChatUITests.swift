@@ -10,32 +10,61 @@ import XCTest
 final class Stock_ChatUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testTabsSearchAndDetail() throws {
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 10))
+        snapshot(app, "1-home")
+
+        tabBar.buttons["ETFs"].tap()
+        XCTAssertTrue(app.navigationBars["ETFs"].waitForExistence(timeout: 5))
+        snapshot(app, "2-etfs")
+
+        tabBar.buttons["Stocks"].tap()
+        XCTAssertTrue(app.navigationBars["Stocks"].waitForExistence(timeout: 5))
+        snapshot(app, "3-stocks")
+
+        tabBar.buttons["Search"].tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        snapshot(app, "4-search")
+
+        field.tap()
+        field.typeText("NVDA")
+        let result = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "NVIDIA Corporation")).firstMatch
+        XCTAssertTrue(result.waitForExistence(timeout: 30))
+        snapshot(app, "5-results")
+
+        result.tap()
+        XCTAssertTrue(app.navigationBars["NVDA"].waitForExistence(timeout: 10))
+        sleep(3)
+        snapshot(app, "6-detail")
+        app.swipeUp()
+        app.swipeUp()
+        sleep(2)
+        snapshot(app, "7-detail-scrolled")
+    }
+
+    @MainActor
+    private func snapshot(_ app: XCUIApplication, _ name: String) {
+        let shot = app.screenshot()
+        let attachment = XCTAttachment(screenshot: shot)
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        if let dir = ProcessInfo.processInfo.environment["SCREENSHOT_DIR"] {
+            try? shot.pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
+        }
     }
 
     @MainActor
     func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
         measure(metrics: [XCTApplicationLaunchMetric()]) {
             XCUIApplication().launch()
         }
