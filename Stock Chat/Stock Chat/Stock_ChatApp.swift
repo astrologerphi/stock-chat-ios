@@ -10,9 +10,11 @@ import SwiftData
 
 @main
 struct Stock_ChatApp: App {
+    @State private var marketData = MarketData.live
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            StarredSymbol.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -25,7 +27,11 @@ struct Stock_ChatApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environment(marketData)
+                .onAppear {
+                    Stars.seedForLocalTestingIfNeeded(in: sharedModelContainer.mainContext)
+                }
         }
         .modelContainer(sharedModelContainer)
     }

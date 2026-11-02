@@ -109,6 +109,7 @@
 				F9D774383094D9EB004F74D0 /* Sources */,
 				F9D774393094D9EB004F74D0 /* Frameworks */,
 				F9D7743A3094D9EB004F74D0 /* Resources */,
+				F9D7746A3094D9EC004F74D0 /* Embed API Secrets */,
 			);
 			buildRules = (
 			);
@@ -223,6 +224,31 @@
 			);
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		F9D7746A3094D9EC004F74D0 /* Embed API Secrets */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../.secrets",
+			);
+			name = "Embed API Secrets";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Secrets.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\nSECRETS_FILE=\"${SRCROOT}/../.secrets\"\nOUTPUT=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Secrets.plist\"\nKEY=\"${FMP_API_KEY:-}\"\nif [ -f \"$SECRETS_FILE\" ]; then\n  FILE_KEY=$(grep -E '^[[:space:]]*fmp[[:space:]]*[:=]' \"$SECRETS_FILE\" | head -n 1 | sed -E 's/^[^:=]*[:=]//' | tr -cd 'A-Za-z0-9_-' || true)\n  if [ -n \"$FILE_KEY\" ]; then KEY=\"$FILE_KEY\"; fi\nfi\nif [ -z \"$KEY\" ]; then\n  echo \"warning: No FMP API key found. Add 'fmp:<key>' to .secrets at the repository root.\"\nfi\nmkdir -p \"$(dirname \"$OUTPUT\")\"\ncat > \"$OUTPUT\" <<EOF\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n	<key>FMPAPIKey</key>\n	<string>$KEY</string>\n</dict>\n</plist>\nEOF\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		F9D774383094D9EB004F74D0 /* Sources */ = {
