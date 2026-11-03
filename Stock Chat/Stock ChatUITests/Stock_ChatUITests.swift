@@ -52,6 +52,50 @@ final class Stock_ChatUITests: XCTestCase {
     }
 
     @MainActor
+    func testSettingsAPIKeys() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let settingsButton = app.navigationBars["Markets"].buttons["Settings"]
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 10))
+        settingsButton.tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+        snapshot(app, "8-settings")
+
+        // The built-in key from .secrets should be accepted.
+        app.buttons["Test Key"].firstMatch.tap()
+        XCTAssertTrue(element(app, containing: "Valid").waitForExistence(timeout: 20))
+
+        // A saved key overrides the built-in one and is rejected by FMP.
+        let field = app.secureTextFields["fmp-key-field"]
+        field.tap()
+        field.typeText("invalid-test-key")
+        app.buttons["Save Key"].firstMatch.tap()
+        XCTAssertTrue(element(app, containing: "Rejected").waitForExistence(timeout: 20))
+        XCTAssertTrue(element(app, containing: "Saved in Settings").exists)
+        snapshot(app, "9-settings-rejected")
+
+        app.navigationBars["Settings"].buttons["Done"].tap()
+        let goToSettings = app.buttons["Settings"].firstMatch
+        XCTAssertTrue(element(app, containing: "API key was rejected").waitForExistence(timeout: 20))
+        snapshot(app, "10-home-rejected")
+
+        // Removing the saved key falls back to the built-in key.
+        goToSettings.tap()
+        app.buttons["Remove Saved Key"].firstMatch.tap()
+        XCTAssertTrue(element(app, containing: "Built in (.secrets)").waitForExistence(timeout: 5))
+        app.navigationBars["Settings"].buttons["Done"].tap()
+        XCTAssertTrue(app.navigationBars["Markets"].waitForExistence(timeout: 5))
+        sleep(5)
+        XCTAssertFalse(element(app, containing: "API key was rejected").exists)
+    }
+
+    @MainActor
+    private func element(_ app: XCUIApplication, containing text: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", text)).firstMatch
+    }
+
+    @MainActor
     private func snapshot(_ app: XCUIApplication, _ name: String) {
         let shot = app.screenshot()
         let attachment = XCTAttachment(screenshot: shot)

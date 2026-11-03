@@ -10,7 +10,9 @@ struct RootView: View {
     @State private var homePath = NavigationPath()
     @State private var searchText = ""
     @State private var searchPath: [SecurityRef] = []
+    @State private var router = AppRouter()
     @AppStorage("selectedMarket") private var market: Market = .us
+    @Environment(MarketData.self) private var marketData
 
     var body: some View {
         TabView(selection: $selection) {
@@ -50,13 +52,19 @@ struct RootView: View {
         .tabViewBottomAccessory {
             MarketStatusAccessory(market: market)
         }
+        // Rebuild the tab content (and reload its data) after API keys change.
+        .id(marketData.revision)
+        .sheet(isPresented: $router.isSettingsPresented) {
+            SettingsView()
+        }
+        .environment(router)
         #if DEBUG
         .onAppear(perform: applyDebugLaunchArguments)
         #endif
     }
 
     #if DEBUG
-    /// Supports `-debugTab etfs|stocks|search`, `-debugSearch <text>` and `-debugOpen AAPL[:etf]` launch arguments for simulator checks.
+    /// Supports `-debugTab etfs|stocks|search`, `-debugSearch <text>` and `-debugOpen AAPL[:etf]` and `-debugSettings YES` launch arguments for simulator checks.
     private func applyDebugLaunchArguments() {
         let defaults = UserDefaults.standard
         switch defaults.string(forKey: "debugTab") {
@@ -74,6 +82,7 @@ struct RootView: View {
             let kind: SecurityKind = parts.count > 1 && parts[1] == "etf" ? .etf : .stock
             homePath.append(SecurityRef(symbol: String(parts[0]), name: String(parts[0]), kind: kind, market: market))
         }
+        if defaults.bool(forKey: "debugSettings") { router.isSettingsPresented = true }
     }
     #endif
 }
