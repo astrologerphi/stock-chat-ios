@@ -46,6 +46,7 @@ final class HomeModel {
 struct HomeView: View {
     @Binding var market: Market
     @Environment(MarketData.self) private var marketData
+    @Environment(AppRouter.self) private var router: AppRouter?
     @Query(sort: \StarredSymbol.starredAt) private var allStars: [StarredSymbol]
     @State private var model = HomeModel()
 
@@ -55,6 +56,9 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
+                if let error = model.error {
+                    ErrorBanner(message: error) { Task { await reload() } }
+                }
                 indicesStrip
                 watchlist
                 newsSection
@@ -67,6 +71,9 @@ struct HomeView: View {
         .navigationTitle("Markets")
         .navigationSubtitle(Date.now.formatted(.dateTime.weekday(.wide).month().day()))
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Settings", systemImage: "gearshape") { router?.isSettingsPresented = true }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Picker("Market", selection: $market) {
@@ -149,9 +156,6 @@ struct HomeView: View {
     private var newsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "News for Your Stars", systemImage: "newspaper.fill")
-            if let error = model.error {
-                ErrorBanner(message: error) { Task { await reload() } }
-            }
             if model.isLoadingNews {
                 ProgressView()
                     .frame(maxWidth: .infinity, minHeight: 120)

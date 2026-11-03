@@ -10,7 +10,7 @@ import SwiftData
 
 @main
 struct Stock_ChatApp: App {
-    @State private var marketData = MarketData.live
+    @State private var marketData = MarketData.live()
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([

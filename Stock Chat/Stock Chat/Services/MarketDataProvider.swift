@@ -28,8 +28,8 @@ nonisolated enum MarketDataError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .missingAPIKey: "No FMP API key found. Add `fmp:<key>` to the .secrets file and rebuild."
-        case .invalidAPIKey: "The FMP API key was rejected."
+        case .missingAPIKey: "No FMP API key. Add one in Settings."
+        case .invalidAPIKey: "The FMP API key was rejected. Update it in Settings."
         case .restricted(let message): message
         case .http(let code): "The server returned an error (\(code))."
         case .notFound: "No data available."
@@ -40,13 +40,29 @@ nonisolated enum MarketDataError: LocalizedError {
 /// Entry point used by views. Resolves the provider for a market.
 @Observable
 final class MarketData {
-    private let providers: [Market: any MarketDataProvider]
+    private var providers: [Market: any MarketDataProvider] = [:]
+    private let makeProviders: () -> [any MarketDataProvider]
+    /// Incremented whenever providers are rebuilt (e.g. after an API key change) so views can reload.
+    private(set) var revision = 0
 
-    init(providers: [any MarketDataProvider]) {
-        self.providers = Dictionary(uniqueKeysWithValues: providers.map { ($0.market, $0) })
+    init(makeProviders: @escaping () -> [any MarketDataProvider]) {
+        self.makeProviders = makeProviders
+        providers = Self.index(makeProviders())
     }
 
-    static let live = MarketData(providers: [FMPClient(apiKey: Secrets.fmpAPIKey)])
+    static func live() -> MarketData {
+        MarketData { [FMPClient(apiKey: Secrets.fmpAPIKey)] }
+    }
+
+    /// Recreates providers with the current API keys and clears their caches.
+    func reloadProviders() {
+        providers = Self.index(makeProviders())
+        revision += 1
+    }
+
+    private static func index(_ providers: [any MarketDataProvider]) -> [Market: any MarketDataProvider] {
+        Dictionary(uniqueKeysWithValues: providers.map { ($0.market, $0) })
+    }
 
     func provider(for market: Market) -> any MarketDataProvider {
         guard let provider = providers[market] else {

@@ -80,6 +80,11 @@ struct SectionHeader: View {
 struct ErrorBanner: View {
     var message: String
     var retry: (() -> Void)?
+    @Environment(AppRouter.self) private var router: AppRouter?
+
+    private var isAPIKeyError: Bool {
+        router != nil && [MarketDataError.missingAPIKey, .invalidAPIKey].contains { $0.errorDescription == message }
+    }
 
     var body: some View {
         GlassCard {
@@ -90,7 +95,10 @@ struct ErrorBanner: View {
                 Text(message)
                     .font(.subheadline)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                if let retry {
+                if isAPIKeyError {
+                    Button("Settings") { router?.isSettingsPresented = true }
+                        .buttonStyle(.glassProminent)
+                } else if let retry {
                     Button("Retry", action: retry)
                         .buttonStyle(.glass)
                 }
