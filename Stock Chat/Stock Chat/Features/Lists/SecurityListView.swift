@@ -52,7 +52,6 @@ struct SecurityListView: View {
     @Query private var stars: [StarredSymbol]
     @State private var model = SecurityListModel()
     @State private var sector: String?
-    @Namespace private var chipNamespace
 
     static let sectors = [
         "Technology", "Healthcare", "Financial Services", "Consumer Cyclical", "Communication Services",
@@ -84,7 +83,6 @@ struct SecurityListView: View {
                             SecurityRow(item: item, starred: Stars.isStarred(item.ref, in: stars))
                         }
                     }
-                    .glassListRow()
                     .swipeActions(edge: .trailing) { starAction(item.ref) }
                     .contextMenu { StarButton(ref: item.ref) }
                     .onAppear {
@@ -108,8 +106,6 @@ struct SecurityListView: View {
                 }
             }
         }
-        .scrollContentBackground(.hidden)
-        .background { AppBackground(tint: kind == .etf ? .purple : .teal) }
         .navigationTitle(kind == .etf ? "ETFs" : "Stocks")
         .navigationSubtitle("\(market.flag) \(market.displayName)")
         .task(id: "\(market.rawValue)|\(sector ?? "")") { await load(reset: true) }
@@ -134,30 +130,27 @@ struct SecurityListView: View {
 
     private var sectorChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            GlassEffectContainer(spacing: 8) {
-                HStack(spacing: 8) {
-                    chip(title: "All", value: nil)
-                    ForEach(Self.sectors, id: \.self) { chip(title: $0, value: $0) }
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 8)
+            HStack(spacing: 8) {
+                chip(title: "All", value: nil)
+                ForEach(Self.sectors, id: \.self) { chip(title: $0, value: $0) }
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 8)
         }
     }
 
     private func chip(title: String, value: String?) -> some View {
         let selected = sector == value
         return Button {
-            withAnimation(.bouncy) { sector = value }
+            withAnimation(.smooth) { sector = value }
         } label: {
             Text(title)
                 .font(.subheadline.weight(selected ? .semibold : .regular))
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
                 .foregroundStyle(selected ? .white : .primary)
+                .background(selected ? Color.accentColor : Color(.secondarySystemGroupedBackground), in: .capsule)
         }
         .buttonStyle(.plain)
-        .glassEffect(selected ? .regular.tint(.accentColor).interactive() : .regular.interactive(), in: .capsule)
-        .glassEffectID(title, in: chipNamespace)
     }
 }

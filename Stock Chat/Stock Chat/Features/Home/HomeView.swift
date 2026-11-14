@@ -67,7 +67,7 @@ struct HomeView: View {
             .padding(.bottom, 24)
         }
         .scrollEdgeEffectStyle(.soft, for: .top)
-        .background { AppBackground() }
+        .flatPageBackground()
         .navigationTitle("Markets")
         .navigationSubtitle(Date.now.formatted(.dateTime.weekday(.wide).month().day()))
         .toolbar {
@@ -101,8 +101,7 @@ struct HomeView: View {
     @ViewBuilder
     private var indicesStrip: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            GlassEffectContainer(spacing: 12) {
-                HStack(spacing: 12) {
+            HStack(spacing: 12) {
                     if model.indices.isEmpty {
                         ForEach(market.benchmarkIndices, id: \.self) { symbol in
                             IndexChip(symbol: symbol, quote: nil)
@@ -115,9 +114,8 @@ struct HomeView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                }
-                .padding(.vertical, 4)
             }
+            .padding(.vertical, 4)
         }
         .scrollClipDisabled()
     }
@@ -127,7 +125,7 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Starred", systemImage: "star.fill", trailing: stars.isEmpty ? nil : "\(stars.count)")
             if stars.isEmpty {
-                GlassCard {
+                Card {
                     VStack(alignment: .leading, spacing: 8) {
                         Label("No stars yet", systemImage: "star")
                             .font(.headline)
@@ -160,7 +158,7 @@ struct HomeView: View {
                 ProgressView()
                     .frame(maxWidth: .infinity, minHeight: 120)
             } else if model.news.isEmpty && !stars.isEmpty && model.error == nil {
-                GlassCard {
+                Card {
                     Text("No recent news for your starred symbols.")
                         .foregroundStyle(.secondary)
                 }
@@ -194,7 +192,7 @@ private struct IndexChip: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .frame(minWidth: 118, alignment: .leading)
-        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 22))
+        .flatSurface(cornerRadius: 18)
         .redacted(reason: quote == nil ? .placeholder : [])
     }
 }
@@ -240,7 +238,7 @@ private struct WatchCard: View {
             .redacted(reason: quote == nil ? .placeholder : [])
         }
         .padding(14)
-        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 26))
-        .contentShape(.rect(cornerRadius: 26))
+        .flatSurface()
+        .contentShape(.rect(cornerRadius: 22))
     }
 }

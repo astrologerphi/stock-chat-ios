@@ -93,8 +93,6 @@ struct SearchView: View {
                 results
             }
         }
-        .scrollContentBackground(.hidden)
-        .background { AppBackground(tint: .indigo) }
         .navigationTitle("Search")
         .onChange(of: path.first) { _, opened in
             if let opened { remember(opened) }
@@ -163,7 +161,6 @@ struct SearchView: View {
         NavigationLink(value: item.ref) {
             SecurityRow(item: item, starred: Stars.isStarred(item.ref, in: stars), showsKind: true)
         }
-        .glassListRow()
         .swipeActions(edge: .trailing) {
             let starred = Stars.isStarred(item.ref, in: stars)
             Button {
