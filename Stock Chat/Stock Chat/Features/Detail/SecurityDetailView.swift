@@ -98,7 +98,7 @@ struct SecurityDetailView: View {
             .padding(.horizontal)
             .padding(.bottom, 32)
         }
-        .background { AppBackground(tint: Color.trend(model.quote?.changePercentage)) }
+        .flatPageBackground()
         .navigationTitle(ref.symbol)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -195,15 +195,14 @@ struct SecurityDetailView: View {
             RangePicker(selection: $range)
         }
         .padding(16)
-        .glassEffect(.regular, in: .rect(cornerRadius: 30))
+        .flatSurface()
     }
 
     private func performance(_ change: PriceChange) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Performance", systemImage: "speedometer")
             ScrollView(.horizontal, showsIndicators: false) {
-                GlassEffectContainer(spacing: 8) {
-                    HStack(spacing: 8) {
+                HStack(spacing: 8) {
                         ForEach(change.entries, id: \.label) { entry in
                             VStack(spacing: 4) {
                                 Text(entry.label)
@@ -216,11 +215,10 @@ struct SecurityDetailView: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .glassEffect(.regular.tint(Color.trend(entry.value).opacity(0.12)), in: .rect(cornerRadius: 16))
+                            .background(Color.trend(entry.value).opacity(0.12), in: .rect(cornerRadius: 14))
                         }
-                    }
-                    .padding(.vertical, 2)
                 }
+                .padding(.vertical, 2)
             }
             .scrollClipDisabled()
         }
@@ -253,7 +251,7 @@ struct SecurityDetailView: View {
         }
         return VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Key Stats", systemImage: "chart.bar.doc.horizontal")
-            GlassCard {
+            Card {
                 Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 14) {
                     ForEach(0..<(stats.count + 1) / 2, id: \.self) { row in
                         GridRow {
@@ -276,7 +274,7 @@ struct SecurityDetailView: View {
     private func etfSection(_ info: ETFInfo) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Fund Details", systemImage: "square.stack.3d.up.fill")
-            GlassCard {
+            Card {
                 VStack(alignment: .leading, spacing: 14) {
                     Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 14) {
                         GridRow {
@@ -335,7 +333,7 @@ struct SecurityDetailView: View {
         if description != nil || facts.contains(where: { $0.1 != nil }) {
             VStack(alignment: .leading, spacing: 12) {
                 SectionHeader(title: "About", systemImage: "info.circle.fill")
-                GlassCard {
+                Card {
                     VStack(alignment: .leading, spacing: 14) {
                         if let description {
                             Text(description)
@@ -394,7 +392,7 @@ private struct Tag: View {
             .font(.caption.weight(.semibold))
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
-            .glassEffect(.regular, in: .capsule)
+            .background(Color(.tertiarySystemFill), in: .capsule)
     }
 }
 

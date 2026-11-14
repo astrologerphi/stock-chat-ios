@@ -68,8 +68,8 @@ struct NewsRow: View {
             }
         }
         .padding(14)
-        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
-        .contentShape(.rect(cornerRadius: 24))
+        .flatSurface()
+        .contentShape(.rect(cornerRadius: 22))
     }
 }
 

@@ -115,7 +115,7 @@ struct RangePicker: View {
             }
         }
         .padding(4)
-        .glassEffect(.regular.interactive(), in: .capsule)
+        .background(Color(.tertiarySystemFill), in: .capsule)
         .sensoryFeedback(.selection, trigger: selection)
     }
 }

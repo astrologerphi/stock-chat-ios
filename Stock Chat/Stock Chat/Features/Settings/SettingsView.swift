@@ -20,8 +20,6 @@ struct SettingsView: View {
                     Text("Keys are stored in this device's Keychain and are only sent to their own service. A key saved here replaces the one built in from `.secrets`.")
                 }
             }
-            .scrollContentBackground(.hidden)
-            .background { AppBackground() }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -70,7 +68,6 @@ private struct APIKeySection: View {
                 .buttonStyle(.borderless)
                 .foregroundStyle(.secondary)
             }
-            .glassListRow()
 
             LabeledContent("Current Key") {
                 if let current {
@@ -82,28 +79,23 @@ private struct APIKeySection: View {
                     Text("Not set")
                 }
             }
-            .glassListRow()
 
             HStack {
                 Text("Status")
                 Spacer()
                 statusLabel
             }
-            .glassListRow()
 
             Button("Save Key", systemImage: "key.fill", action: save)
                 .disabled(trimmedDraft.isEmpty)
-                .glassListRow()
 
             Button("Test Key", systemImage: "checkmark.shield") {
                 Task { await test(trimmedDraft.isEmpty ? current?.value : trimmedDraft) }
             }
             .disabled(isChecking || (trimmedDraft.isEmpty && current == nil))
-            .glassListRow()
 
             if current?.source == .settings {
                 Button("Remove Saved Key", systemImage: "trash", role: .destructive, action: remove)
-                    .glassListRow()
             }
         } header: {
             Text(service.displayName)
